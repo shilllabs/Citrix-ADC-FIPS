@@ -1,0 +1,114 @@
+-Node1- 10.37.2.81
+-Node2- 10.37.2.82
+
+-On Both Nodes-
+en feature ssl
+
+Initialize the FIPS Hardware Security Module (HSM)
+
+-Run the below on Node1-
+reset fips
+save ns config
+reboot
+
+-Run the below on Node2-
+reset fips
+save ns config
+reboot
+
+-Run the below on Node1-
+set ssl fips -initHSM Level-2 sopin12345 so12345 user123 -hsmLabel NS
+save ns config
+reboot
+
+-Run the below on Node2-
+set ssl fips -initHSM Level-2 sopin12345 so12345 user123 -hsmLabel NS
+save ns config
+reboot
+
+-Run show fips on each node to see if modules are configured-
+show fips
+
+
+Secure Information Management (SIM) Process (Must be completed in 6 Minutes):
+
+-Run the below on Node1-
+init fipsSIMsource /nsconfig/ssl/source.cert
+shell scp /nsconfig/ssl/source.cert nsroot@10.37.2.82:/nsconfig/ssl/
+
+-Run the below on Node2-
+init fipsSIMtarget /nsconfig/ssl/source.cert /nsconfig/ssl/target.key /nsconfig/ssl/target.secret
+shell scp /nsconfig/ssl/target.secret nsroot@10.37.2.81:/nsconfig/ssl/
+
+-Run the below on Node1-
+enable fipsSIMsource /nsconfig/ssl/target.secret /nsconfig/ssl/source.secret
+shell scp /nsconfig/ssl/source.secret nsroot@10.37.2.82:/nsconfig/ssl/
+
+-Run the below on Node2-
+enable fipsSIMtarget /nsconfig/ssl/target.key /nsconfig/ssl/source.secret
+
+-Run the below on Node1 to clean up files during SIM-
+shell rm /nsconfig/ssl/source.cert
+shell rm /nsconfig/ssl/source.secret
+shell rm /nsconfig/ssl/target.secret
+
+-Run the below on Node1 to clean up files during SIM-
+shell rm /nsconfig/ssl/source.cert
+shell rm /nsconfig/ssl/source.secret
+shell rm /nsconfig/ssl/target.secret
+shell rm /nsconfig/ssl/target.key
+
+
+Create a test FIPS key and export from Node 1 then import to Node 2:
+
+-Run the below on Node1-
+create ssl fipsKey fipskey1 -modulus 2048 -exponent f4 -keytype rsa
+export ssl fipsKey fipskey1 -key fipskey1
+shell scp /nsconfig/ssl/fipskey1 nsroot@10.37.2.82:/nsconfig/ssl/
+
+-Run the below on Node2-
+import ssl fipsKey fipskey1 -key fipskey1 -inform SIM
+show ssl fips
+show ssl fipskey
+
+-Run the below on both nodes to clean up fipskey export-
+shell rm /nsconfig/ssl/fipskey1
+
+
+Configure Interfaces for HA
+
+-On Both Nodes-
+set int 0/2 haMonitor OFF
+set int 0/2 -haHeartbeat OFF
+dis int 0/2
+set int 10/1 haMonitor OFF
+set int 10/1 -haHeartbeat OFF
+dis int 10/1
+
+
+HA Pair
+
+-Node2-
+set HA node -haStatus STAYSECONDARY
+add ha node 1 10.37.2.81
+-Node1-
+add ha node 1 10.37.2.82
+-Node1-
+show ha node
+-Node2-
+set HA node -haStatus ENABLED
+show ha node
+
+
+
+Re-enable other interfaces:
+set int 0/2 haMonitor ON
+set int 0/2 -haHeartbeat ON
+en int 0/2
+set int 10/1 haMonitor ON
+set int 10/1 -haHeartbeat ON
+en int 10/1
+
+
+
+save config
