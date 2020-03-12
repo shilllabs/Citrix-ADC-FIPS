@@ -1,0 +1,39 @@
+Node1=10.37.2.81
+Node2=10.37.2.82
+
+-Node1 (Primary)-
+import ssl fipskey ns-server -key /nsconfig/ssl/ns-server.key -inform PEM
+export ssl fipsKey ns-server -key ns-server.fips
+shell scp /nsconfig/ssl/ns-server.fips nsroot@10.37.2.82:/nsconfig/ssl/
+shell scp /nsconfig/ssl/ns-server.cert nsroot@10.37.2.82:/nsconfig/ssl/
+
+-Node2 (Secondary)-
+import ssl fipsKey ns-server -key ns-server.fips -inform SIM
+
+-Node1 (Primary)-
+add ssl certKey ns-server -cert ns-server.cert -fipskey ns-server
+bind ssl service nshttps-127.0.0.1-443 -certkeyName ns-server
+bind ssl service nsrnatsip-127.0.0.1-5061 -certkeyName ns-server
+bind ssl service nskrpcs-127.0.0.1-3009 -certkeyName ns-server
+bind ssl service nshttps-::1l-443 -certkeyName ns-server
+bind ssl service nsrpcs-::1l-3008 -certkeyName ns-server
+bind ssl service nsrpcs-127.0.0.1-3008 -certkeyName ns-server
+
+##############################
+if the below is seen run this command > shell rm /root/.ssh/known_hosts
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that a host key has just been changed.
+The fingerprint for the RSA key sent by the remote host is
+SHA256:YMkJQe9YYt5rRcxP+96NbBUhWJi3HjY3LlJt31Xa890.
+Please contact your system administrator.
+Add correct host key in /root/.ssh/known_hosts to get rid of this message.
+Offending RSA key in /root/.ssh/known_hosts:1
+RSA host key for 10.37.2.82 has changed and you have requested strict checking.
+Host key verification failed.
+lost connection
+ERROR:
