@@ -52,7 +52,7 @@ shell rm /nsconfig/ssl/source.cert
 shell rm /nsconfig/ssl/source.secret
 shell rm /nsconfig/ssl/target.secret
 
--Run the below on Node1 to clean up files during SIM-
+-Run the below on Node2 to clean up files during SIM-
 shell rm /nsconfig/ssl/source.cert
 shell rm /nsconfig/ssl/source.secret
 shell rm /nsconfig/ssl/target.secret
