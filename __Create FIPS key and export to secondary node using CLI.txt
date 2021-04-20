@@ -1,0 +1,7 @@
+-Run the below on Node1 (10.37.2.81)-
+create ssl fipsKey fipskey1 -modulus 2048 -exponent f4 -keytype rsa
+export ssl fipsKey fipskey1 -key fipskey1
+shell scp /nsconfig/ssl/fipskey1 nsroot@10.37.2.82:/nsconfig/ssl/
+
+-Run the below on Node2 (10.37.2.82)-
+import ssl fipsKey fipskey1 -key fipskey1 -inform SIM
