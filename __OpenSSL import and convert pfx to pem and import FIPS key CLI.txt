@@ -1,0 +1,25 @@
+find/replace this value with the name of the PFX certificate file excluding the file extension
+SL_Wildcard_Local_20200903
+
+
+Export public key from PFX
+shell openssl pkcs12 -in "/nsconfig/ssl/SL_Wildcard_Local_20200903.pfx" -nokeys -out "/nsconfig/ssl/SL_Wildcard_Local_20200903.cer"
+
+Convert public key to PEM format
+shell openssl x509 -in "/nsconfig/ssl/SL_Wildcard_Local_20200903.cer" -out "/nsconfig/ssl/SL_Wildcard_Local_20200903.pem"
+
+Export private key from PFX
+shell openssl pkcs12 -in "/nsconfig/ssl/SL_Wildcard_Local_20200903.pfx" -nocerts -out "/nsconfig/ssl/SL_Wildcard_Local_20200903.key" -nodes
+
+Convert private key to PEM format
+shell openssl rsa -in "/nsconfig/ssl/SL_Wildcard_Local_20200903.key" -out "/nsconfig/ssl/SL_Wildcard_Local_20200903.pem.key"
+
+Import PEM Key to FIPS Key
+import ssl fipskey SL_Wildcard_Local_20200903 -key /nsconfig/ssl/SL_Wildcard_Local_20200903.pem.key -inform PEM
+
+Install Certificate using FIPS Key
+add ssl certKey SL_Wildcard_Local_20200903 -cert SL_Wildcard_Local_20200903.cer -fipsKey SL_Wildcard_Local_20200903 -inform PEM -expiryMonitor ENABLED -notificationPeriod 30 -bundle NO
+
+Remove unencrypted key file from filesystem
+shell rm /nsconfig/ssl/SL_Wildcard_Local_20200903.key
+shell rm /nsconfig/ssl/SL_Wildcard_Local_20200903.pem.key
